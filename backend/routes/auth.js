@@ -25,14 +25,21 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log('Login attempt:', email, password); // DEBUG
     if (!email || !password)
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     const user = await User.findOne({ email }).select('+password');
+    console.log('User found:', user ? 'YES' : 'NO'); // DEBUG
+    if (user) {
+      const match = await user.matchPassword(password);
+      console.log('Password match:', match); // DEBUG
+    }
     if (!user || !(await user.matchPassword(password)))
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     const token = signToken(user._id);
     res.json({ success: true, token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
+    console.log('Error:', err.message); // DEBUG
     res.status(500).json({ success: false, message: err.message });
   }
 });
