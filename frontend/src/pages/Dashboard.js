@@ -58,12 +58,74 @@ export default function Dashboard() {
     labels: ['Paid', 'Partial', 'Pending'],
     datasets: [{ data: [78, 12, 10], backgroundColor: ['#1D9E75', '#EF9F27', '#E24B4A'], borderWidth: 0 }],
   };
-  const donutOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } }, cutout: '70%' };
+  const donutOptions = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12 } } },
+    cutout: '70%',
+  };
 
   return (
     <>
+      <style>{`
+        /* ── Dashboard responsive overrides ── */
+        .dash-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+        .dash-charts-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+        .dash-bottom-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        .dash-right-col {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        /* recent activity table: hide time on small screens */
+        .dash-time-col { display: table-cell; }
+
+        @media (max-width: 900px) {
+          .dash-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .dash-charts-grid {
+            grid-template-columns: 1fr;
+          }
+          .dash-bottom-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        @media (max-width: 480px) {
+          .dash-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+          }
+          .dash-time-col {
+            display: none;
+          }
+          .stat-card {
+            padding: 12px !important;
+          }
+          .stat-value {
+            font-size: 20px !important;
+          }
+          .dash-charts-grid {
+            gap: 8px;
+          }
+        }
+      `}</style>
+
       {/* Stats */}
-      <div className="stats-grid">
+      <div className="dash-stats-grid">
         {STATS.map((s) => (
           <div key={s.label} className="stat-card">
             <div className="stat-bar" style={{ background: s.color }} />
@@ -83,7 +145,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts row */}
-      <div className="grid-2">
+      <div className="dash-charts-grid">
         <div className="card mb-0">
           <div className="card-header">
             <span className="card-title">Weekly attendance trend</span>
@@ -104,7 +166,7 @@ export default function Dashboard() {
       </div>
 
       {/* Tables row */}
-      <div className="grid-2" style={{ marginTop: 12 }}>
+      <div className="dash-bottom-grid" style={{ marginTop: 12 }}>
         <div className="card mb-0">
           <div className="card-header">
             <span className="card-title">Recent activity</span>
@@ -112,14 +174,26 @@ export default function Dashboard() {
           </div>
           <div className="table-wrap">
             <table>
-              <thead><tr><th>Student</th><th>Class</th><th>Event</th><th>Time</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Class</th>
+                  <th>Event</th>
+                  <th className="dash-time-col">Time</th>
+                </tr>
+              </thead>
               <tbody>
                 {RECENT.map((r) => (
                   <tr key={r.name}>
-                    <td><div className="name-cell"><div className={`avatar ${r.av}`}>{r.init}</div>{r.name}</div></td>
+                    <td>
+                      <div className="name-cell">
+                        <div className={`avatar ${r.av}`}>{r.init}</div>
+                        {r.name}
+                      </div>
+                    </td>
                     <td className="text-muted">{r.cls}</td>
                     <td><span className={`badge ${r.badge}`}>{r.event}</span></td>
-                    <td className="text-muted">{r.time}</td>
+                    <td className="text-muted dash-time-col">{r.time}</td>
                   </tr>
                 ))}
               </tbody>
@@ -127,7 +201,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="dash-right-col">
           <div className="card mb-0">
             <div className="card-header">
               <span className="card-title">Class performance</span>

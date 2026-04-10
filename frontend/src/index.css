@@ -217,14 +217,9 @@ tbody tr:hover td { background: var(--bg-secondary); }
   border-radius: var(--radius-md); cursor: pointer; transition: all 0.12s;
   border: 0.5px solid var(--border);
 }
-.btn-primary {
-  background: var(--accent-light); color: var(--accent-dark);
-  border-color: #9FE1CB;
-}
+.btn-primary { background: var(--accent-light); color: var(--accent-dark); border-color: #9FE1CB; }
 .btn-primary:hover { background: #9FE1CB; }
-.btn-ghost {
-  background: transparent; color: var(--text-secondary);
-}
+.btn-ghost { background: transparent; color: var(--text-secondary); }
 .btn-ghost:hover { background: var(--bg-secondary); color: var(--text-primary); }
 .btn-sm { padding: 4px 10px; font-size: 12px; }
 .btn-danger { background: var(--danger-bg); color: var(--danger-text); border-color: #F7C1C1; }
@@ -378,3 +373,80 @@ tbody tr:hover td { background: var(--bg-secondary); }
 .modal-title  { font-size: 15px; font-weight: 600; color: var(--text-primary); }
 .modal-close  { background: none; border: none; cursor: pointer; color: var(--text-secondary); font-size: 20px; line-height: 1; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+
+/* ══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE  ≤ 768px
+   NOTE: .desktop-sidebar hides sidebar (not .sidebar)
+   so the mob-drawer is never affected
+══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ✅ Hide ONLY the desktop sidebar */
+  .desktop-sidebar {
+    display: none !important;
+  }
+
+  /* ✅ Main area full width */
+  .main-area {
+    margin-left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+  }
+
+  /* ✅ No horizontal overflow */
+  .app-shell {
+    overflow-x: hidden !important;
+  }
+
+  /* Stats 2 columns */
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* All grids → 1 column */
+  .grid-2, .grid-2-eq, .grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-content { padding: 12px 14px !important; }
+  .topbar { padding: 0 14px !important; height: 52px; }
+  .topbar-crumb   { display: none !important; }
+  .topbar-divider { display: none !important; }
+  .topbar-chip:last-child { display: none !important; }
+
+  .table-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  table { min-width: 520px; }
+  .tt-grid { min-width: 560px; }
+  .card { overflow-x: auto; }
+
+  .search-bar { flex-wrap: wrap; }
+  .search-bar .form-input { width: 100%; min-width: 0; }
+
+  .stat-value { font-size: 20px !important; }
+
+  .modal-overlay { align-items: flex-end !important; }
+  .modal {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 18px 16px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    max-height: 85vh !important;
+  }
+
+  .login-card { padding: 28px 20px !important; margin: 16px !important; }
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE  ≤ 480px
+══════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .stats-grid   { gap: 8px !important; }
+  .stat-card    { padding: 12px 13px !important; }
+  .topbar-title { font-size: 14px !important; }
+  .card         { padding: 13px 14px !important; }
+  .page-content { padding: 10px !important; }
+  .avatar { width: 26px !important; height: 26px !important; font-size: 10px !important; }
+}

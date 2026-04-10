@@ -41,6 +41,49 @@ export default function Notices() {
 
   return (
     <>
+      <style>{`
+        /* Notices responsive */
+        .notice-meta-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+        }
+        .notice-filter-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        @media (max-width: 540px) {
+          .notice-meta-grid {
+            grid-template-columns: 1fr;
+          }
+          .notice-meta-grid > div {
+            margin-bottom: 0 !important;
+          }
+          .notice-filter-bar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+        }
+        /* notice header badges: wrap on small screens */
+        .notice-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .notice-header-badges {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+          flex-wrap: wrap;
+        }
+      `}</style>
+
       {/* Post form */}
       <div className="card">
         <div className="card-header">
@@ -58,11 +101,11 @@ export default function Notices() {
             <textarea className="form-textarea" rows={3} required placeholder="Notice content…" value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
+          <div className="notice-meta-grid">
             {[
-              ['category','Category', ['General','Exam','Event','Holiday','Fee','Sports']],
-              ['audience','Audience', ['All','Students','Teachers','Parents','Staff']],
-              ['priority','Priority', ['Low','Medium','High']],
+              ['category', 'Category', ['General','Exam','Event','Holiday','Fee','Sports']],
+              ['audience', 'Audience', ['All','Students','Teachers','Parents','Staff']],
+              ['priority', 'Priority', ['Low','Medium','High']],
             ].map(([k, lbl, opts]) => (
               <div key={k} className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">{lbl}</label>
@@ -73,22 +116,26 @@ export default function Notices() {
             ))}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
-            <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Posting…' : 'Post notice'}</button>
+            <button type="submit" className="btn btn-primary" disabled={saving}>
+              {saving ? 'Posting…' : 'Post notice'}
+            </button>
           </div>
         </form>
       </div>
 
       {/* Notice list */}
       <div className="card">
-        <div className="card-header">
+        <div className="card-header notice-filter-bar">
           <span className="card-title">All notices — {filtered.length} total</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <select className="form-select" style={{ padding: '5px 9px', fontSize: 12 }} value={filter}
-              onChange={(e) => setFilter(e.target.value)}>
-              <option value="">All categories</option>
-              {['General','Exam','Event','Holiday','Fee','Sports'].map((c) => <option key={c}>{c}</option>)}
-            </select>
-          </div>
+          <select
+            className="form-select"
+            style={{ padding: '5px 9px', fontSize: 12 }}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <option value="">All categories</option>
+            {['General','Exam','Event','Holiday','Fee','Sports'].map((c) => <option key={c}>{c}</option>)}
+          </select>
         </div>
 
         {loading ? (
@@ -103,17 +150,23 @@ export default function Notices() {
             <div key={n._id} className="notice-item">
               <div className="notice-header">
                 <span className="notice-title">{n.title}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="notice-header-badges">
                   <span className={`badge ${CAT_BADGE[n.category] || 'badge-info'}`}>{n.category}</span>
                   <span className="badge badge-info" style={{ fontSize: 10 }}>{n.audience}</span>
-                  <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger-text)', padding: '2px 8px' }}
-                    onClick={() => handleDelete(n._id)}>×</button>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    style={{ color: 'var(--danger-text)', padding: '2px 8px' }}
+                    onClick={() => handleDelete(n._id)}
+                  >×</button>
                 </div>
               </div>
               <div className="notice-meta">
                 {new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                 {n.postedBy?.name ? ` · by ${n.postedBy.name}` : ''}
-                {' · '}<span style={{ color: n.priority === 'High' ? 'var(--danger-text)' : n.priority === 'Medium' ? 'var(--warning-text)' : 'var(--success-text)' }}>{n.priority} priority</span>
+                {' · '}
+                <span style={{ color: n.priority === 'High' ? 'var(--danger-text)' : n.priority === 'Medium' ? 'var(--warning-text)' : 'var(--success-text)' }}>
+                  {n.priority} priority
+                </span>
               </div>
               <div className="notice-body">{n.content}</div>
             </div>

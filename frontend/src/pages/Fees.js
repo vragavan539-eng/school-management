@@ -13,12 +13,12 @@ const MOCK_FEES = [
 const fmt = (n) => '₹' + n.toLocaleString('en-IN');
 
 export default function Fees() {
-  const [fees, setFees]         = useState(MOCK_FEES);
-  const [filter, setFilter]     = useState('');
-  const [search, setSearch]     = useState('');
+  const [fees,     setFees]     = useState(MOCK_FEES);
+  const [filter,   setFilter]   = useState('');
+  const [search,   setSearch]   = useState('');
   const [payModal, setPayModal] = useState(null);
   const [payForm,  setPayForm]  = useState({ amount: '', method: 'Cash', receiptNo: '' });
-  const [saving, setSaving]     = useState(false);
+  const [saving,   setSaving]   = useState(false);
 
   const totalCollected = fees.reduce((a, f) => a + f.paidAmount, 0);
   const totalPending   = fees.reduce((a, f) => a + (f.totalAmount - f.paidAmount), 0);
@@ -33,7 +33,6 @@ export default function Fees() {
   const handlePayment = async (e) => {
     e.preventDefault(); setSaving(true);
     try {
-      // In production: await recordPayment(payModal._id, payForm);
       setFees(fees.map((f) => f._id === payModal._id
         ? { ...f, paidAmount: f.paidAmount + Number(payForm.amount), status: f.paidAmount + Number(payForm.amount) >= f.totalAmount ? 'Paid' : 'Partial' }
         : f
@@ -44,16 +43,54 @@ export default function Fees() {
 
   return (
     <>
-      <div className="stats-grid cols3">
+      <style>{`
+        /* Fees responsive */
+        .fees-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+          margin-bottom: 12px;
+        }
+        .fees-search-bar {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 12px;
+          flex-wrap: wrap;
+        }
+        .fees-search-bar .form-input  { flex: 1; min-width: 160px; }
+        .fees-search-bar .form-select { min-width: 110px; }
+
+        /* hide some columns on mobile */
+        @media (max-width: 640px) {
+          .fees-col-total  { display: none; }
+          .fees-col-due    { display: none; }
+          .fees-col-class  { display: none; }
+          .fees-stats-grid { grid-template-columns: 1fr 1fr; }
+          .fees-stats-grid > div:last-child { grid-column: span 2; }
+        }
+        @media (max-width: 400px) {
+          .fees-stats-grid { grid-template-columns: 1fr; }
+          .fees-stats-grid > div:last-child { grid-column: span 1; }
+        }
+        /* modal form */
+        @media (max-width: 480px) {
+          .fees-pay-modal { max-width: 95vw !important; }
+        }
+      `}</style>
+
+      {/* Stats */}
+      <div className="fees-stats-grid">
         {[
           ['Total collected', fmt(totalCollected), 'badge-success', `${paidCount} students fully paid`],
           ['Pending',         fmt(totalPending),   'badge-danger',  `${fees.length - paidCount} students`],
-          ['Collection rate', Math.round((totalCollected/(totalCollected+totalPending))*100) + '%', 'badge-info', 'This term'],
+          ['Collection rate', Math.round((totalCollected / (totalCollected + totalPending)) * 100) + '%', 'badge-info', 'This term'],
         ].map(([lbl, val, bc, sub]) => (
           <div key={lbl} className="stat-card">
             <div className="stat-label">{lbl}</div>
             <div className="stat-value">{val}</div>
-            <div className="stat-trend"><span className={`badge ${bc}`} style={{ fontSize: 10 }}>{sub}</span></div>
+            <div className="stat-trend">
+              <span className={`badge ${bc}`} style={{ fontSize: 10 }}>{sub}</span>
+            </div>
           </div>
         ))}
       </div>
@@ -63,17 +100,28 @@ export default function Fees() {
           <span className="card-title">Fee records</span>
           <button className="btn btn-primary btn-sm">+ Add fee record</button>
         </div>
-        <div className="search-bar">
+
+        <div className="fees-search-bar">
           <input className="form-input" placeholder="Search student…" value={search} onChange={(e) => setSearch(e.target.value)} />
           <select className="form-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
             <option value="">All status</option>
             <option>Paid</option><option>Partial</option><option>Pending</option>
           </select>
         </div>
+
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Student</th><th>Class</th><th>Total</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th><th></th></tr>
+              <tr>
+                <th>Student</th>
+                <th className="fees-col-class">Class</th>
+                <th className="fees-col-total">Total</th>
+                <th>Paid</th>
+                <th>Balance</th>
+                <th className="fees-col-due">Due Date</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
             </thead>
             <tbody>
               {filtered.map((f) => {
@@ -88,17 +136,24 @@ export default function Fees() {
                         {f.student.name}
                       </div>
                     </td>
-                    <td className="text-muted">{f.student.class}{f.student.section}</td>
-                    <td>{fmt(f.totalAmount)}</td>
+                    <td className="text-muted fees-col-class">{f.student.class}{f.student.section}</td>
+                    <td className="fees-col-total">{fmt(f.totalAmount)}</td>
                     <td className="text-success fw-500">{fmt(f.paidAmount)}</td>
                     <td style={{ color: balance > 0 ? 'var(--danger-text)' : 'var(--text-secondary)', fontWeight: balance > 0 ? 600 : 400 }}>
                       {fmt(balance)}
                     </td>
-                    <td className="text-muted">{new Date(f.dueDate).toLocaleDateString('en-IN')}</td>
-                    <td><span className={`badge ${f.status==='Paid'?'badge-success':f.status==='Partial'?'badge-warning':'badge-danger'}`}>{f.status}</span></td>
+                    <td className="text-muted fees-col-due">{new Date(f.dueDate).toLocaleDateString('en-IN')}</td>
+                    <td>
+                      <span className={`badge ${f.status === 'Paid' ? 'badge-success' : f.status === 'Partial' ? 'badge-warning' : 'badge-danger'}`}>
+                        {f.status}
+                      </span>
+                    </td>
                     <td>
                       {f.status !== 'Paid' && (
-                        <button className="btn btn-ghost btn-sm" onClick={() => { setPayModal(f); setPayForm({ amount: String(f.totalAmount - f.paidAmount), method: 'Cash', receiptNo: '' }); }}>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => { setPayModal(f); setPayForm({ amount: String(f.totalAmount - f.paidAmount), method: 'Cash', receiptNo: '' }); }}
+                        >
                           Pay
                         </button>
                       )}
@@ -113,7 +168,7 @@ export default function Fees() {
 
       {payModal && (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setPayModal(null)}>
-          <div className="modal" style={{ maxWidth: 380 }}>
+          <div className="modal fees-pay-modal" style={{ maxWidth: 380, width: '100%' }}>
             <div className="modal-header">
               <span className="modal-title">Record payment — {payModal.student.name}</span>
               <button className="modal-close" onClick={() => setPayModal(null)}>×</button>
